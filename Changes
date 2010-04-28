@@ -1,0 +1,18 @@
+Revision history for Data-Object
+
+0.01    10 August 2009
+        Initial release
+
+0.02	11 August 2009
+		Re-uploaded, the first release used the wrong tarball
+
+0.03	11 August 2009
+		Directory permission were broken in 0.02
+
+0.04	14 August 2009
+		* added build requirement for Test::Deep
+		* support for resolving hash keys with colons and dashes
+
+0.05	20 August 2009
+		* fixes to build script
+		* additions to documentation
