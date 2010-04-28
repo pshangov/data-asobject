@@ -16,3 +16,8 @@ Revision history for Data-Object
 0.05	20 August 2009
 		* fixes to build script
 		* additions to documentation
+
+0.06	28 April 2010
+		* switched to Dist::Zilla
+		* removed automatic dereferencing in list context
+		* accessing missing hash keys as methods now produces a fatal

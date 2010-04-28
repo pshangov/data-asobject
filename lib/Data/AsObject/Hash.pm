@@ -59,10 +59,9 @@ sub AUTOLOAD {
 		}
 			
 		if ( $Data::AsObject::__check_type->($data) eq "ARRAY" ) {
-			bless $data, "Data::AsObject::Array";
-			return wantarray ? $data->all : $data;
+			return bless $data, "Data::AsObject::Array";
 		} elsif ( $Data::AsObject::__check_type->($data) eq "HASH" ) {
-			return wantarray ? %{$data} : bless $data, "Data::AsObject::Hash";
+			return bless $data, "Data::AsObject::Hash";
 		} else {
 			return $data;
 		}

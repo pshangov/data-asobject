@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 11;
 use Test::Deep;
 use Data::AsObject qw(dao);
 
@@ -36,17 +36,10 @@ isa_ok($dao_object, "Data::AsObject::Hash");
 ### DATA ACCESS ###
 
 is         ( $dao->test,          1,                 "Test data access 1" );
-cmp_deeply ( [$dao->blah],        noclass([1,2,3]),  "Test data access 2" );
+cmp_deeply ( $dao->blah,          noclass([1,2,3]),  "Test data access 2" );
 is         ( $dao->blah(0),       1,                 "Test data access 3" );
 is         ( $dao->blah->get(0),  1,                 "Test data access 4" );
 is         ( $dao->bong(0)->town, 'sliven',          "Test data access 5" );
-
-
-### LIST CONTEXT ###
-
-my @districts;
-push @districts, $_->district for $dao->bong;
-cmp_deeply( \@districts, noclass([qw(center druzhba bakston)]), "Test list context" );
 
 
 ### ASSIGNING ###
