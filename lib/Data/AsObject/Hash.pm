@@ -68,4 +68,13 @@ sub AUTOLOAD {
 	}
 }
 
+package Data::AsObject::Hash::Strict;
+use base 'Data::AsObject::Hash';
+
+package Data::AsObject::Hash::Loose;
+use base 'Data::AsObject::Hash';
+
+package Data::AsObject::Hash::Silent;
+use base 'Data::AsObject::Hash';
+
 1;

@@ -7,8 +7,7 @@ use Scalar::Util qw(reftype blessed);
 use Data::AsObject::Hash;
 use Data::AsObject::Array;
 
-use base 'Exporter';
-our @EXPORT = qw(dao);
+
 
 our $__check_type = sub {
 	my $data = shift;
@@ -29,29 +28,70 @@ our $__check_type = sub {
 	}
 };
 
-sub dao {
-	my @args = @_;
-	my @result;
+sub _build_dao 
+{
+	my ($class, $sub, $arg) = @_;
+	#use Data::Dumper qw(Dumper);
+	#warn Dumper \@_;
+	$arg ||= {};
+	my ($array_class, $hash_class);
+	my $mode = $arg->{mode};
 
-	foreach my $data (@args) {
-		
-		my $type = reftype($data);
-		my $dao;
-	
-		if ($type eq "ARRAY") {
-			$dao = bless $data, "Data::AsObject::Array";
-		} elsif ($type eq "HASH") {
-			$dao = bless $data, "Data::AsObject::Hash";
-		} else {
-			carp "Invalid argument to dao: must be hashref or arrayref!";
-			$dao = undef;
+	if ($mode)
+	{
+		if ($mode eq 'strict')
+		{
+			$array_class = 'Data::AsObject::Array::Strict';
+			$hash_class = 'Data::AsObject::Hash::Strict';
 		}
-		push @result, $dao;
+		elsif ($mode eq 'loose')
+		{
+			$array_class = 'Data::AsObject::Array::Loose';
+			$hash_class = 'Data::AsObject::Hash::Loose';
+		}
+		elsif ($mode eq 'silent')
+		{
+			$array_class = 'Data::AsObject::Array::Silent';
+			$hash_class = 'Data::AsObject::Hash::Silent';
+		}
+		else
+		{
+			croak "Unknown mode '$mode' for dao construction";
+		}
 	}
+	else
+	{
+		$array_class = 'Data::AsObject::Array::Strict';
+		$hash_class = 'Data::AsObject::Hash::Strict';
+	}
+	
 
-	return wantarray ? @result : $result[0];
+	return sub 
+	{
+		my @args = @_;
+		my @result;
 
+		foreach my $data (@args) {
+		
+			my $type = reftype($data);
+			my $dao;
+		
+			if ($type eq "ARRAY") {
+				$dao = bless $data, "Data::AsObject::Array";
+			} elsif ($type eq "HASH") {
+				$dao = bless $data, "Data::AsObject::Hash";
+			} else {
+				carp "Invalid argument to dao: must be hashref or arrayref!";
+				$dao = undef;
+			}
+			push @result, $dao;
+		}
+
+		return wantarray ? @result : $result[0];
+	}
 }
+
+use Sub::Exporter -setup => { exports => [ dao => \'_build_dao' ] };
 
 1; 
 
