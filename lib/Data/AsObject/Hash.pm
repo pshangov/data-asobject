@@ -3,15 +3,16 @@ package Data::AsObject::Hash;
 use strict;
 use warnings;
 use Carp;
-use Scalar::Util qw(reftype blessed);
 use Data::AsObject ();
-use Data::AsObject::Array ();
 
 our $AUTOLOAD;
 
 sub AUTOLOAD {
 	my $self = shift;
 	my $index = shift;
+
+	ref($self) =~ /^.*::(\w+)$/;
+	my $mode = $1;
 
 	my $key = $AUTOLOAD;
 	$key =~ s/.*:://;
@@ -22,7 +23,9 @@ sub AUTOLOAD {
 	}
 
 	if ($key eq "isa" && defined $index && $index != /\d+/) {
-		$index eq "Data::AsObject::Hash" or $index eq "UNIVERSAL" 
+		$index eq ref($self) or 
+		$index eq "Data::AsObject::Hash" or 
+		$index eq "UNIVERSAL"
 			? return 1 
 			: return 0;
 	}
@@ -42,7 +45,19 @@ sub AUTOLOAD {
 			carp "Attempt to disambiguate hash key $key returns multiple matches!";
 			return;
 		} else {
-			carp "Attempting to access non-existing hash key $key!" unless $key eq "DESTROY";
+			if ($key ne "DESTROY")
+			{
+				my $msg = "Attempting to access non-existing hash key $key!";
+
+				if ($mode eq 'Strict')
+				{
+					croak $msg;
+				}
+				elsif ($mode eq 'Loose')
+				{
+					carp $msg;
+				}
+			}
 			return;
 		}
 	}
@@ -59,9 +74,9 @@ sub AUTOLOAD {
 		}
 			
 		if ( $Data::AsObject::__check_type->($data) eq "ARRAY" ) {
-			return bless $data, "Data::AsObject::Array";
+			return bless $data, "Data::AsObject::Array::$mode";
 		} elsif ( $Data::AsObject::__check_type->($data) eq "HASH" ) {
-			return bless $data, "Data::AsObject::Hash";
+			return bless $data, "Data::AsObject::Hash::$mode";
 		} else {
 			return $data;
 		}

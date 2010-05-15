@@ -7,8 +7,6 @@ use Scalar::Util qw(reftype blessed);
 use Data::AsObject::Hash;
 use Data::AsObject::Array;
 
-
-
 our $__check_type = sub {
 	my $data = shift;
 	return unless $data;
@@ -16,9 +14,9 @@ our $__check_type = sub {
 	my $type = reftype($data);
 
 	if (defined $type) {
-		if ( $type eq "ARRAY" && ( !blessed($data) || ref($data) eq "Data::AsObject::Array" ) ) {
+		if ( $type eq "ARRAY" && ( !blessed($data) || ref($data) =~ /^Data::AsObject::Array::(Strict|Loose|Silent)/ ) ) {
 			return "ARRAY";
-		} elsif ( $type eq "HASH" && ( !blessed($data) || ref($data) eq "Data::AsObject::Hash" ) ) {
+		} elsif ( $type eq "HASH" && ( !blessed($data) || ref($data) =~ /^Data::AsObject::Hash::(Strict|Loose|Silent)/ ) ) {
 			return "HASH";
 		} else {
 			return "";
@@ -31,40 +29,22 @@ our $__check_type = sub {
 sub _build_dao 
 {
 	my ($class, $sub, $arg) = @_;
-	#use Data::Dumper qw(Dumper);
-	#warn Dumper \@_;
-	$arg ||= {};
+	my $mode = $arg->{mode} if $arg;
+
 	my ($array_class, $hash_class);
-	my $mode = $arg->{mode};
 
 	if ($mode)
 	{
-		if ($mode eq 'strict')
-		{
-			$array_class = 'Data::AsObject::Array::Strict';
-			$hash_class = 'Data::AsObject::Hash::Strict';
-		}
-		elsif ($mode eq 'loose')
-		{
-			$array_class = 'Data::AsObject::Array::Loose';
-			$hash_class = 'Data::AsObject::Hash::Loose';
-		}
-		elsif ($mode eq 'silent')
-		{
-			$array_class = 'Data::AsObject::Array::Silent';
-			$hash_class = 'Data::AsObject::Hash::Silent';
-		}
-		else
-		{
-			croak "Unknown mode '$mode' for dao construction";
-		}
+		croak "Unknown mode '$mode' for dao construction" unless $mode =~/^strict|loose|silent$/;
+		$mode = ucfirst($mode);
 	}
 	else
 	{
-		$array_class = 'Data::AsObject::Array::Strict';
-		$hash_class = 'Data::AsObject::Hash::Strict';
+		$mode = 'Strict';
 	}
-	
+
+	$array_class = "Data::AsObject::Array::$mode";
+	$hash_class = "Data::AsObject::Hash::$mode";	
 
 	return sub 
 	{
@@ -77,9 +57,9 @@ sub _build_dao
 			my $dao;
 		
 			if ($type eq "ARRAY") {
-				$dao = bless $data, "Data::AsObject::Array";
+				$dao = bless $data, $array_class;
 			} elsif ($type eq "HASH") {
-				$dao = bless $data, "Data::AsObject::Hash";
+				$dao = bless $data, $hash_class;
 			} else {
 				carp "Invalid argument to dao: must be hashref or arrayref!";
 				$dao = undef;
