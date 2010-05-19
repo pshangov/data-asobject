@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use lib q(lib);
-use Data::AsObject qw(dao);
+use Data::AsObject dao => { mode => 'strict' };
 
 plan tests => 2;
 
