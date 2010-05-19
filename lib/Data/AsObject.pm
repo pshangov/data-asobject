@@ -6,6 +6,7 @@ use Carp;
 use Scalar::Util qw(reftype blessed);
 use Data::AsObject::Hash;
 use Data::AsObject::Array;
+use namespace::clean;
 
 our $__check_type = sub {
 	my $data = shift;

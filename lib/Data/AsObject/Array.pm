@@ -5,6 +5,7 @@ use warnings;
 
 use Carp qw(carp croak);
 use Data::AsObject qw();
+use namespace::clean -except => [qw/get/];
 
 
 sub get {

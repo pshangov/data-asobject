@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::AsObject ();
+use namespace::clean -except => [qw/AUTOLOAD/];
 
 our $AUTOLOAD;
 
