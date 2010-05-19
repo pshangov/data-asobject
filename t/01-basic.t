@@ -3,6 +3,7 @@ use warnings;
 
 use Test::More tests => 11;
 use Test::Deep;
+use lib q(lib);
 use Data::AsObject qw(dao);
 
 my $data = {
