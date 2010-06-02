@@ -16,7 +16,7 @@ sub can {
 
     my($self, $key) = @_;
     return unless( exists $self->{$key} );
-    return sub { _new_data($self, $key) };
+    return sub { __get_data($self, $key) };
 }
 
 sub AUTOLOAD {
@@ -40,18 +40,22 @@ sub AUTOLOAD {
 			: return 0;
 	}
 
-        return _new_data($self, $key, $index);
+    return __get_data($self, $key, $index);
 }
 
-sub _new_data {
-	my $self = shift;
-	my $key = shift;
-	my $index = shift;
-	my $data = exists $self->{$key} ? $self->{$key} : _data_by_guess($self, $key);
+sub __get_data {
+	my ($self, $key, $index) = @_;
+	my $data = exists $self->{$key} ? $self->{$key} : __guess_data($self, $key);
 	my $mode = ref($self) =~ /^.*::(\w+)$/ ? $1 : '';
 
-	unless ( $data ) {
-	    return;
+	if ( !$data ) {
+		return     if $key eq "DESTROY";
+
+		my $msg = "Attempting to access non-existing hash key $key!";
+
+		carp $msg  if $mode eq 'Loose';
+		croak $msg if $mode eq 'Strict';
+		return;
 	}
 
 	if (
@@ -73,7 +77,7 @@ sub _new_data {
 	return $data;
 }
 
-sub _data_by_guess {
+sub __guess_data {
 	my $self = shift;
 	my $key_regex = shift;
 	my $has_colon_or_dash = $key_regex =~ s/_/[-:]/g;
@@ -83,6 +87,7 @@ sub _data_by_guess {
 		return $self->{$matches[0]};
 	} elsif ( @matches > 1 ) {
 		carp "Attempt to disambiguate hash key $key_regex returns multiple matches!";
+		return $self->{$matches[0]};
 	}
 
 	return;

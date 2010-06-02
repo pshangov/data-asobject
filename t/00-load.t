@@ -1,5 +1,10 @@
 #!perl -T
 
+use strict;
+use warnings;
+
+use lib q(lib);
+
 use Test::More tests => 1;
 
 BEGIN {

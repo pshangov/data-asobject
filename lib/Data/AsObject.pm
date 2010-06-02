@@ -113,7 +113,7 @@ Automatic dereferencing in list context is no longer provided. Use L<Ref::List::
 
 =item * 
 
-An attempt to access an unexisting hash key or array item now dies rather than simply produce a warning. Use an exception handling mechanism to check if the data you want to access is actually there.
+An attempt to access an unexisting hash key or array item by default now dies rather than simply produce a warning. Use an exception handling mechanism to check if the data you want to access is actually there.
 
 =back
 
@@ -135,7 +135,7 @@ Since C<Data::AsObject> does not preform any autovivification, it protects you f
 
 If your hashes contain a lot of keys with dashes or colons, as is often the case with keys representing xml element names, C<Data::AsObject> can autmatically access such keys by substituting underscores for the non-standard symbols.
 
-=item Easy dereferencing of arrayref
+=item Easy dereferencing of arrayrefs
 
 If you have a lot of arrayrefs in your data structure that often need to be traversed, e.g. with C<grep>, C<map> or C<foreach>, C<Data::AsObject> works in conjunction with L<Ref::List::AsObject> to make automatic dereferencing very convenient.
 
@@ -145,7 +145,31 @@ If you have a lot of arrayrefs in your data structure that often need to be trav
 
 =head2 dao
 
-Takes as input one or more hash or array references, and returns one or more objects (C<Data::AsObject::Hash> or C<Data::AsObject::Array> respectively) that can be used to access the data structures via an object oriented interface. Exported by default.
+Takes as input one or more hash or array references, and returns one or more objects (C<Data::AsObject::Hash> or C<Data::AsObject::Array> respectively) that can be used to access the data structures via an object oriented interface.
+
+Data::AsObject uses L<Sub::Exporter> and allows you to import the C<dao> sub in one of three modes:
+
+=over
+
+=item strict mode
+
+	use Data::AsObject dao => { mode => 'strict' };
+
+In this mode (which is the default) C<dao> will produce an object that dies whenever you try to invoke a hash key that does not exist.
+
+=item loose mode
+
+	use Data::AsObject dao => { mode => 'loose' };
+
+In this mode C<dao> will produce an object that returns C<undef> and issues a warning whenever you try to invoke a hash key that does not exist.
+
+=item strict mode
+
+	use Data::AsObject dao => { mode => 'silent' };
+
+In this mode C<dao> will produce an object that returns C<undef> whenever you try to invoke a hash key that does not exist.
+
+=back
 
 =head1 USAGE
 
@@ -216,17 +240,9 @@ C<Data::AsObject> only provides accessor functions. To modify data, access the r
 	$data->{one} = "uno";
 	print $data->one # uno
 
-Note that the accessor methods return references to the underlying data structure rather than clones:
-
-	my $data = dao {};
-	my $copy = $data;
-
-	$data->{one} = "uno";
-	print $copy->one # uno
-
 =head2 Autovivification
 
-No autovivification is performed. An attempt to access a hash or array element that does not exist will produce a fatal error. Use an exception handling mechanism such as L<Try::Tiny>.
+No autovivification is performed by default (but see L<FUNCTIONS> above). An attempt to access a hash or array element that does not exist will produce a fatal error. Use an exception handling mechanism such as L<Try::Tiny>.
 
 	use Try::Tiny;
 
@@ -250,7 +266,7 @@ If C<$data> isa C<Data::AsObject::Hash>:
 
 =item can
 
-Attempts to call C<$data-E<gt>can("some_method_name")> will always return C<undef>, regardless of whether a C<$data-E<gt>{"some_method_name"}> hash key exists or not.
+C<$data-E<gt>can> will return the value of the C<$data-E<gt>{can}> element. C<$data-E<gt>can("some_hash_key")> will properly return C<undef> if C<some_hash_key> does not exists, or a reference to a sub that returns C<$data-E<gt>{some_hash_key}> otherwise.
 
 =item VERSION
 
