@@ -27,12 +27,22 @@ our $__check_type = sub {
 	}
 };
 
-sub _build_dao 
+sub __build_dao 
 {
 	my ($class, $sub, $arg) = @_;
 	my $mode = $arg->{mode} if $arg;
 
-	my ($array_class, $hash_class);
+	return sub 
+	{
+		my @result;
+		push @result, __bless_dao($_, $mode) for @_;
+		return wantarray ? @result : $result[0];
+	}
+}
+
+sub __bless_dao
+{
+	my ($data, $mode) = @_;
 
 	if ($mode)
 	{
@@ -44,35 +54,30 @@ sub _build_dao
 		$mode = 'Strict';
 	}
 
-	$array_class = "Data::AsObject::Array::$mode";
-	$hash_class = "Data::AsObject::Hash::$mode";	
+	my $array_class = "Data::AsObject::Array::$mode";
+	my $hash_class = "Data::AsObject::Hash::$mode";
 
-	return sub 
+	my $type = reftype($data);
+	
+	my $dao;
+		
+	if ($type eq "ARRAY") 
 	{
-		my @args = @_;
-		my @result;
-
-		foreach my $data (@args) {
-		
-			my $type = reftype($data);
-			my $dao;
-		
-			if ($type eq "ARRAY") {
-				$dao = bless $data, $array_class;
-			} elsif ($type eq "HASH") {
-				$dao = bless $data, $hash_class;
-			} else {
-				carp "Invalid argument to dao: must be hashref or arrayref!";
-				$dao = undef;
-			}
-			push @result, $dao;
-		}
-
-		return wantarray ? @result : $result[0];
+		$dao = bless $data, $array_class;
+	} 
+	elsif ($type eq "HASH") 
+	{
+		$dao = bless $data, $hash_class;
+	} 
+	else 
+	{
+		carp "Invalid argument to dao: must be hashref or arrayref!";
+		$dao = undef;
 	}
+	return $dao;
 }
 
-use Sub::Exporter -setup => { exports => [ dao => \'_build_dao' ] };
+use Sub::Exporter -setup => { exports => [ dao => \'__build_dao' ] };
 
 1; 
 

@@ -48,6 +48,27 @@ sub get {
 	}
 }
 
+sub list
+{
+	my $self = shift;
+	croak "List does not accept arguments" if @_;
+
+	my $mode;
+	$mode = 'strict' if $self->isa('Data::AsObject::Array::Strict');
+	$mode = 'loose'  if $self->isa('Data::AsObject::Array::Loose');
+	$mode = 'silent' if $self->isa('Data::AsObject::Array::Silent');
+	carp "Unknown class used as Data::AsObject::Array" unless $mode;
+
+	my @array;
+	foreach  my $value (@$self) 
+	{
+		$Data::AsObject::__check_type->($value) 
+			? push @array, Data::AsObject::__bless_dao($value, $mode) 
+			: push @array, $value;
+	}
+	return @array;
+}
+
 package Data::AsObject::Array::Strict;
 use base 'Data::AsObject::Array';
 
