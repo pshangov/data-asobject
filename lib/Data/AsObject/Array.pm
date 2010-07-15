@@ -79,3 +79,11 @@ package Data::AsObject::Array::Silent;
 use base 'Data::AsObject::Array';
 
 1;
+
+=head1 NAME
+
+Data::AsObject::Array - Base class for Data::AsObject arrays
+
+=head1 SYNOPSIS
+
+See L<Data::AsObject> for more information.

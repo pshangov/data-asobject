@@ -95,12 +95,12 @@ Data::AsObject - Easy OO access to complex perl data structures
 		
 	};
     
-	print $book->name              # prints "Programming Perl"
-	print $book->authors(0)        # prints "Larry Wall"
-	my $array_ref = $book->authors # $array_ref is ["Larry Wall", "Tom Christiansen", "Jon Orwant"]
-	my @array = $book->authors     # @array is ("Larry Wall", "Tom Christiansen", "Jon Orwant")
+	print $book->name                # prints "Programming Perl"
+	print $book->authors(0)          # prints "Larry Wall"
+	my $array_ref = $book->authors   # $array_ref is ["Larry Wall", "Tom Christiansen", "Jon Orwant"]
+	my @array = $book->authors->list # @array is ("Larry Wall", "Tom Christiansen", "Jon Orwant")
 	$book->{publisher} = "O'Reilly";
-	print $book->publisher         # prints "O'Reilly"
+	print $book->publisher           # prints "O'Reilly"
 
 =head1 DESCRIPTION
 
@@ -114,11 +114,11 @@ Version 0.06 of C<Data::AsObject> broke backwards compatibility with two changes
 
 =item * 
 
-Automatic dereferencing in list context is no longer provided. Use L<Ref::List::AsObject> to achieve this result.
+Automatic dereferencing in list context is no longer provided. Use the C<list> method instead.
 
 =item * 
 
-An attempt to access an unexisting hash key or array item by default now dies rather than simply produce a warning. Use an exception handling mechanism to check if the data you want to access is actually there.
+An attempt to access an unexisting hash key by default now dies rather than simply produce a warning. Either explicitly request Data::AsObject not to die on missing hash keys, or use an exception handling mechanism to check if the data you want to access is actually there.
 
 =back
 
@@ -142,7 +142,7 @@ If your hashes contain a lot of keys with dashes or colons, as is often the case
 
 =item Easy dereferencing of arrayrefs
 
-If you have a lot of arrayrefs in your data structure that often need to be traversed, e.g. with C<grep>, C<map> or C<foreach>, C<Data::AsObject> works in conjunction with L<Ref::List::AsObject> to make automatic dereferencing very convenient.
+If you have a lot of arrayrefs in your data structure that often need to be traversed, e.g. with C<grep>, C<map> or C<foreach>, C<Data::AsObject> provides a C<list> method on arrayrefs to automatically dereference them.
 
 =back
 
@@ -172,7 +172,7 @@ In this mode C<dao> will produce an object that returns C<undef> and issues a wa
 
 	use Data::AsObject dao => { mode => 'silent' };
 
-In this mode C<dao> will produce an object that returns C<undef> whenever you try to invoke a hash key that does not exist.
+In this mode C<dao> will produce an object that returns C<undef> whenever you try to invoke a hash key that does not exist, but does not complain.
 
 =back
 
@@ -220,12 +220,8 @@ Array of array structures are a little bit clumsier to work with. You will need 
 
 	print $data->get(2)->get(0); # un
 
-=head2 Integration with L<Ref::List::AsObject>
+Arrayrefs have a dereferencing C<list> method. For example:
 
-C<Data::AsObject> can work with L<Ref::List::AsObject> (from the L<Ref::List> distribution) to allow easy dereferencing of arrayrefs and hashrefs in list context. For example:
-
-	use Ref::List::AsObject qw(list);
-	
 	my $data = dao {
 		spain => [ 
 			{ name => 'spanish', numbers => ["uno", "dos", "tres", "cuatro"] },
@@ -233,7 +229,7 @@ C<Data::AsObject> can work with L<Ref::List::AsObject> (from the L<Ref::List> di
 		];
 	};
 
-	foreach my $n ( list $data->spain ) {
+	foreach my $n ( $data->spain->list ) {
 		print $n->name . " ";
 	} # spanish catalan
 
@@ -263,6 +259,8 @@ No autovivification is performed by default (but see L<FUNCTIONS> above). An att
 		warn "No info about Bulgaria!";
 	};
 
+See also C<can> below.
+
 =head2 C<Data::AsObject::Hash> and special methods
 
 If C<$data> isa C<Data::AsObject::Hash>:
@@ -272,6 +270,13 @@ If C<$data> isa C<Data::AsObject::Hash>:
 =item can
 
 C<$data-E<gt>can> will return the value of the C<$data-E<gt>{can}> element. C<$data-E<gt>can("some_hash_key")> will properly return C<undef> if C<some_hash_key> does not exists, or a reference to a sub that returns C<$data-E<gt>{some_hash_key}> otherwise.
+
+	my $data = dao {
+		uk      => ["one", "two", "three", "four"],
+		# ...
+	};
+
+	warn "No info about Bulgaria!" unless $data->can('bulgaria');
 
 =item VERSION
 

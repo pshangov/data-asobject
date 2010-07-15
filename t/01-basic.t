@@ -5,7 +5,7 @@ use warnings;
 
 use lib q(lib);
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Test::Deep;
 use Data::AsObject qw(dao);
 
@@ -45,9 +45,11 @@ is         ( $dao->blah(0),       1,                 "Test data access 3" );
 is         ( $dao->blah->get(0),  1,                 "Test data access 4" );
 is         ( $dao->bong(0)->town, 'sliven',          "Test data access 5" );
 
-### ARRAY DEREFERENCING ###
+### ARRAYREF DEREFERENCING ###
 
 is_deeply([$dao->blah->list], [1,2,3], "Dereferencing arrayrefs");
+my @bong = $dao->bong->list;
+isa_ok($bong[0], "Data::AsObject::Hash");
 
 ### ASSIGNING ###
 

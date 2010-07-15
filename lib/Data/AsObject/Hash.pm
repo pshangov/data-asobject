@@ -104,3 +104,11 @@ package Data::AsObject::Hash::Silent;
 use base 'Data::AsObject::Hash';
 
 1;
+
+=head1 NAME
+
+Data::AsObject::Hash - Base class for Data::AsObject hashes
+
+=head1 SYNOPSIS
+
+See L<Data::AsObject> for more information.
