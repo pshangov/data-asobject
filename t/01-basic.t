@@ -10,16 +10,16 @@ use Test::Deep;
 use Data::AsObject qw(dao);
 
 my $data = {
-	test => 1,
-	blah => [1,2,3],
-	kaboom => {one => 'true', two => 'false'},
-	bong => [
-		{ town => 'sliven', district => 'center', },
-		{ town => 'sofia', district => 'druzhba', },
-		{ town => 'sofia', district => 'bakston', },
-	],
-	'xml:thingy' => 2,
-	'meaning-of-life' => 42,
+    test => 1,
+    blah => [1,2,3],
+    kaboom => {one => 'true', two => 'false'},
+    bong => [
+        { town => 'sliven', district => 'center', },
+        { town => 'sofia', district => 'druzhba', },
+        { town => 'sofia', district => 'bakston', },
+    ],
+    'xml:thingy' => 2,
+    'meaning-of-life' => 42,
 };
 
 ### INITIALIZATION ###

@@ -1,5 +1,7 @@
 package Data::AsObject::Hash;
 
+# ABSTRACT: Base class for Data::AsObject hashrefs
+
 use strict;
 use warnings;
 use Carp;
@@ -20,77 +22,77 @@ sub can {
 }
 
 sub AUTOLOAD {
-	my $self = shift;
-	my $index = shift;
+    my $self = shift;
+    my $index = shift;
         my $data;
 
-	my $key = $AUTOLOAD;
-	$key =~ s/.*:://;
-	undef $AUTOLOAD;
+    my $key = $AUTOLOAD;
+    $key =~ s/.*:://;
+    undef $AUTOLOAD;
 
-	if ($key eq "can" && defined $index && $index != /\d+/) {
-		return undef;
-	}
+    if ($key eq "can" && defined $index && $index != /\d+/) {
+        return undef;
+    }
 
-	if ($key eq "isa" && defined $index && $index != /\d+/) {
-		$index eq ref($self) or 
-		$index eq "Data::AsObject::Hash" or 
-		$index eq "UNIVERSAL"
-			? return 1 
-			: return 0;
-	}
+    if ($key eq "isa" && defined $index && $index != /\d+/) {
+        $index eq ref($self) or
+        $index eq "Data::AsObject::Hash" or
+        $index eq "UNIVERSAL"
+            ? return 1
+            : return 0;
+    }
 
     return __get_data($self, $key, $index);
 }
 
 sub __get_data {
-	my ($self, $key, $index) = @_;
-	my $data = exists $self->{$key} ? $self->{$key} : __guess_data($self, $key);
-	my $mode = ref($self) =~ /^.*::(\w+)$/ ? $1 : '';
+    my ($self, $key, $index) = @_;
+    my $data = exists $self->{$key} ? $self->{$key} : __guess_data($self, $key);
+    my $mode = ref($self) =~ /^.*::(\w+)$/ ? $1 : '';
 
-	if ( !$data ) {
-		return     if $key eq "DESTROY";
+    if ( !$data ) {
+        return     if $key eq "DESTROY";
 
-		my $msg = "Attempting to access non-existing hash key $key!";
+        my $msg = "Attempting to access non-existing hash key $key!";
 
-		carp $msg  if $mode eq 'Loose';
-		croak $msg if $mode eq 'Strict';
-		return;
-	}
+        carp $msg  if $mode eq 'Loose';
+        croak $msg if $mode eq 'Strict';
+        return;
+    }
 
-	if (
-		    defined $index
-		&& $index =~ /\d+/
-		&& $Data::AsObject::__check_type->($data) eq "ARRAY"
-		&& exists $data->[$index]
-	)
-	{
-		$data = $data->[$index];
-	}
-		
-	if ( $Data::AsObject::__check_type->($data) eq "ARRAY" ) {
-		bless $data, "Data::AsObject::Array::$mode";
-	} elsif ( $Data::AsObject::__check_type->($data) eq "HASH" ) {
-		bless $data, "Data::AsObject::Hash::$mode";
-	}
+    if (
+            defined $index
+        && $index =~ /\d+/
+        && $Data::AsObject::__check_type->($data) eq "ARRAY"
+        && exists $data->[$index]
+    )
+    {
+        $data = $data->[$index];
+    }
 
-	return $data;
+    if ( $Data::AsObject::__check_type->($data) eq "ARRAY" ) {
+        bless $data, "Data::AsObject::Array::$mode";
+    } elsif ( $Data::AsObject::__check_type->($data) eq "HASH" ) {
+        bless $data, "Data::AsObject::Hash::$mode";
+    }
+
+    return $data;
 }
 
 sub __guess_data {
-	my $self = shift;
-	my $key_regex = shift;
-	my $has_colon_or_dash = $key_regex =~ s/_/[-:]/g;
-	my @matches = grep(/$key_regex/, keys %$self) if $has_colon_or_dash;
+    my $self = shift;
+    my $key_regex = shift;
+    my $has_colon_or_dash = $key_regex =~ s/_/[-:]/g;
+    my @matches = grep(/$key_regex/, keys %$self) if $has_colon_or_dash;
 
-	if ( @matches == 1 ) {
-		return $self->{$matches[0]};
-	} elsif ( @matches > 1 ) {
-		carp "Attempt to disambiguate hash key $key_regex returns multiple matches!";
-		return $self->{$matches[0]};
-	}
+    if ( @matches == 1 ) {
+        return $self->{$matches[0]};
+    } elsif ( @matches > 1 ) {
+        carp "Attempt to disambiguate hash key $key_regex returns multiple matches!";
+        return $self->{$matches[0]};
+    }
 
-	return;
+    return;
 }
 
 

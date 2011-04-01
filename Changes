@@ -25,3 +25,8 @@ Revision history for Data-Object
 		* added proper behaviour of 'can' method (JHTHORSEN)
 		* fixed #57470 - droppings in namespace (JHTHORSEN)
 		* added tests and updated documentation (JHTHORSEN, PSHANGOV)
+
+0.07	01 April 2011
+		* remove dos line endings (PSHANGOV)
+        * remove tabs (PSHANGOV)
+        * fix spelling in pod (PSHANGOV)
