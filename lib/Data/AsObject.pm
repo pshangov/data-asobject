@@ -168,7 +168,7 @@ In this mode (which is the default) C<dao> will produce an object that dies when
 
 In this mode C<dao> will produce an object that returns C<undef> and issues a warning whenever you try to invoke a hash key that does not exist.
 
-=item strict mode
+=item silent mode
 
     use Data::AsObject dao => { mode => 'silent' };
 
