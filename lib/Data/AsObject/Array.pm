@@ -10,6 +10,24 @@ use Data::AsObject qw();
 use namespace::clean -except => [qw/get/];
 
 
+# Define what happens if objects of this class are used as subroutine references, 
+# i.e. if called like this: $obj->(@args).  We define:
+#
+#         $obj->(@args) <=> $obj->get(@args)
+#
+use overload '&{}' => sub {
+                            my $self = shift;
+                            return sub {
+                                return $self->get(@_);
+                            };
+                          },
+             # activate default behaviour for all other contexts
+             # if you do not, things like if (! $obj) will throw
+             # strange errors: Operation "bool": no method found, ...
+             'fallback' => 1, 
+;
+
+
 sub get {
     my $self = shift;
     my $index = shift;
