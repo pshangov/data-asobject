@@ -197,8 +197,6 @@ If a hash key contains one or more colons or dashes, you can access its value by
 
 =head2 Working with arrays
 
-To access array items pass the item index as an argument to the hash that contains the array:
-
     my $data = dao {
         uk => ["one", "two", "three", "four"],
         spain => [
@@ -207,10 +205,24 @@ To access array items pass the item index as an argument to the hash that contai
         ];
     };
 
+For accessing array items you can pass the item index as an argument to the hash that contains the array:
+
     print $data->en(1) # two
     print $data->spain(0)->numbers(3); # cuatro
 
-Array of array structures are a little bit clumsier to work with. You will need to use the C<get> method of C<Data::AsObject::Array> and pass it the index of the item you want to access:
+You can use the C<get> method of C<Data::AsObject::Array> and pass it the index of the item you want to access:
+
+    print $data->en->get(1) # two
+    print $data->spain->get(0)->numbers->(3); # cuatro
+
+
+Or you can use a functional style: 
+
+    print $data->en->(1) # two
+    print $data->spain->(0)->numbers->(3); # cuatro
+
+
+Array of array structures are easy to work with. You can use all styles to access array elements.
 
     my $data = dao [
         ["one", "two", "three", "four"]
@@ -219,6 +231,20 @@ Array of array structures are a little bit clumsier to work with. You will need 
     ];
 
     print $data->get(2)->get(0); # un
+    print $data(2)->get(0);      # un
+    print $data->get(2)->(0);    # un
+    print $data->(2)->get(0);    # un
+    print $data->(2)->(0);       # un
+    print $data->(2)(0);         # un
+
+    NOTE: the calls $data->get(2), $data(2), $data->(2) in the example above
+          return an object representing the array. 
+
+          Because of the way perl parses expressions 
+                $data->get(2)(0) 
+          and 
+                $data(2)(0)
+          are syntax errors.
 
 Arrayrefs have a dereferencing C<list> method. For example:
 
